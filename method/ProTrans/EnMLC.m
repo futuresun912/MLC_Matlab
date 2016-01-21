@@ -11,7 +11,6 @@ rndNUM = round([num_att,num_lab,num_int].*percent);
 d = rndNUM(1); L = rndNUM(2); N = rndNUM(3);
 
 % Perform the ensemble of models
-% Pre_Labels = zeros(num_lab,size(test_data,1));
 Outputs = zeros(num_lab,size(test_data,1));
 count = zeros(1,num_lab);
 for i = 1:m
@@ -20,12 +19,7 @@ for i = 1:m
     rndIDX_int = randperm(num_int);
     [Temp_Labels,~] = model(train_data(rndIDX_int(1:N),rndIDX_att(1:d)'),...
         train_target(rndIDX_lab(1:L),rndIDX_int(1:N)'),test_data(:,rndIDX_att(1:d)'));
-%     Pre_Labels(rndIDX_lab(1:L),:) = Pre_Labels(rndIDX_lab(1:L),:)+ Temp_Labels;
     Outputs(rndIDX_lab(1:L),:) = Outputs(rndIDX_lab(1:L),:)+ Temp_Labels;
-%     temp_count = zeros(1,num_lab);
-%     temp_count(rndIDX_lab(1:L)) = 1;
-%     count = count + temp_count;
-%     count(rndIDX_lab(1:L)) = bsxfun(@plus,count(rndIDX_lab(1:L)),1);
     count(rndIDX_lab(1:L)) = count(rndIDX_lab(1:L)) + ones(1,L);
 end
 Outputs = bsxfun(@rdivide,Outputs,count');

@@ -16,8 +16,13 @@ num_test = size(test_data,1);
 Outputs = zeros(num_label,num_test);
 Pre_Labels = zeros(num_label,num_test);
 for i = chain
-    ww{i} = ridgereg(train_target(i,:)',[train_data train_target(pa,:)'],lambda);
-    Outputs(i,:) = [ones(num_test,1),test_data,Pre_Labels(pa,:)'] * ww{i};
+    if isempty(pa)
+        ww{i} = ridgereg(train_target(i,:)',train_data,lambda);
+        Outputs(i,:) = [ones(num_test,1),test_data] * ww{i};
+    else
+        ww{i} = ridgereg(train_target(i,:)',[train_data train_target(pa,:)'],lambda);
+        Outputs(i,:) = [ones(num_test,1),test_data,Pre_Labels(pa,:)'] * ww{i};
+    end
     Pre_Labels(i,:) = round(Outputs(i,:));
     pa = [pa i];
 end

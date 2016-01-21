@@ -23,13 +23,17 @@ function [Pre_Labels,Outputs] = CBMLC(train_data,train_target,test_data,num_clus
 % centroid = bsxfun(@rdivide,centroid,count');
 
 % kmeans -- the MATLAB version
-[trainInd,centroid] = kmeans(train_data,num_cluster,'EmptyAction','singleton','OnlinePhase','off','Display','off');
+[trainInd,centroid] = kmeans(train_data,num_cluster,...
+    'EmptyAction','singleton','OnlinePhase','off','Display','off');
+% [trainInd,centroid] = kmeans([train_data,train_target'],num_cluster,...
+%     'EmptyAction','singleton','OnlinePhase','off','Display','off');
+% centroid = centroid(:,1:size(train_data,2));
 
 % Find the nearest cluster for each test instance
 v1 = dot(test_data,test_data,2); 
 v2 = dot(centroid,centroid,2);
 D = bsxfun(@plus,v1,v2') - 2*(test_data*centroid');
-[~,testInd] = min(D,[],2);
+[~,testInd] = min(D,[],2);  % find the nearest cluster
 
 % Apply local MLC on each cluster 
 Pre_Labels = zeros(size(train_target,1),size(test_data,1));
@@ -37,17 +41,64 @@ Outputs = zeros(size(train_target,1),size(test_data,1));
 if any(isequal(model,@EnMLC))
     percent = [0.5,0.8,0.8];
     for i = 1:num_cluster
-        local_trainInd = (trainInd == i);
-        local_testInd = (testInd == i);
+        local_testInd = find(testInd == i);
+        if isempty(local_testInd)
+            continue
+        end
+        local_trainInd = find(trainInd == i);
         [Pre_Labels(:,local_testInd'),Outputs(:,local_testInd')] = model(train_data(local_trainInd,:),...
             train_target(:,local_trainInd'),test_data(local_testInd,:),percent,20,@CCridge);
     end
 else
     for i = 1:num_cluster
-        local_trainInd = (trainInd == i);
-        local_testInd = (testInd == i);
+        local_testInd = find(testInd == i);
+        if isempty(local_testInd)
+            continue
+        end
+        local_trainInd = find(trainInd == i);
         [Pre_Labels(:,local_testInd'),Outputs(:,local_testInd')] = model(train_data(local_trainInd,:),...
             train_target(:,local_trainInd'),test_data(local_testInd,:));
     end
 end
+
+
+% % Find k nearest clusters for each test instance
+% k = 1;
+% v1 = dot(test_data,test_data,2);
+% v2 = dot(centroid,centroid,2);
+% D = bsxfun(@plus,v1,v2') - 2*(test_data*centroid');
+% if (k == 1 || num_cluster == 2)
+%     [~,testInd] = min(D,[],2);  
+% elseif (k < num_cluster)
+%     [~,testInd] = sort(D,2);    
+%     testInd(:,(k+1):end) = [];
+% else
+%     fprintf(1,'ERROR, unavailable input parameters');
+%     return;
+% end
+% 
+% % Apply local MLC on each cluster
+% Outputs = zeros(size(train_target,1),size(test_data,1));
+% if any(isequal(model,@EnMLC))
+%     percent = [0.5,0.8,0.8];
+%     for i = 1:num_cluster
+%         local_trainInd = (trainInd == i);
+%         [local_testInd,~] = find(testInd == i);
+%         local_testInd = sort(local_testInd);
+%         [Temp_Labels,~] = model(train_data(local_trainInd,:),...
+%             train_target(:,local_trainInd'),test_data(local_testInd,:),percent,20,@CCridge);
+%         Outputs(:,local_testInd') = Outputs(:,local_testInd') + Temp_Labels;
+%     end
+% else
+%     for i = 1:num_cluster
+%         local_trainInd = (trainInd == i);
+%         [local_testInd,~] = find(testInd == i);
+%         local_testInd = sort(local_testInd);
+%         [Temp_Labels,~] = model(train_data(local_trainInd,:),...
+%             train_target(:,local_trainInd'),test_data(local_testInd,:));
+%         Outputs(:,local_testInd') = Outputs(:,local_testInd') + Temp_Labels;
+%     end
+% end
+% Outputs = Outputs ./ k;
+% Pre_Labels = round(Outputs);
 end

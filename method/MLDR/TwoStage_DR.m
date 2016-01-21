@@ -51,7 +51,7 @@ if strcmpi(opts.alg, '2s-lsqr')
         B = sparse(1:d, 1:d, opts.reg_2norm);
         X_ex = [X'; B];        
         for i = 1:size(H, 2)
-            w = lsqr(X_ex, [H(:, i); zeros(d, 1)], opts.lsqr_tol, opts.lsqr_maxiter);
+            [w,~] = lsqr(X_ex, [H(:, i); zeros(d, 1)], opts.lsqr_tol, opts.lsqr_maxiter);
             W1 = [W1, w];
         end
     end
