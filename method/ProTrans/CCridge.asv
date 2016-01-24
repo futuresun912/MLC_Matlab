@@ -1,0 +1,36 @@
+function [Pre_Labels,Outputs] = CCridge(train_data,train_target,test_data,chain)
+%CCRIDGE 此处显示有关此函数的摘要
+%   此处显示详细说明
+
+% Ridge parameter
+lambda = 0.1;
+
+num_label = size(train_target,1);
+
+% Randomly generate a chain order
+if nargin < 4
+rng('default');
+rng()
+chain = randperm(num_label);
+end
+
+% Ridge Regression
+pa = [];
+ww = cell(1,num_label);
+num_test = size(test_data,1);
+Outputs = zeros(num_label,num_test);
+Pre_Labels = zeros(num_label,num_test);
+for i = chain
+    if isempty(pa)
+        ww{i} = ridgereg(train_target(i,:)',train_data,lambda);
+        Outputs(i,:) = [ones(num_test,1),test_data] * ww{i};
+    else
+        ww{i} = ridgereg(train_target(i,:)',[train_data train_target(pa,:)'],lambda);
+        Outputs(i,:) = [ones(num_test,1),test_data,Pre_Labels(pa,:)'] * ww{i};
+    end
+    Pre_Labels(i,:) = round(Outputs(i,:));
+    pa = [pa i];
+end
+
+end
+

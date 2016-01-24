@@ -57,19 +57,19 @@ else
         end
         local_trainInd = find(trainInd == i);
         
-%         remove = find(all(train_target(:,local_trainInd')==0,2));
-        remove = all(train_target(:,local_trainInd')==0,2);
-        cluster_target = train_target(~remove,local_trainInd');
-%         cluster_target(remove,:) = [];
+        remove = all(train_target(:,local_trainInd'),2);
+        cluster_target = train_target(:,local_trainInd');
+        cluster_target(remove,:) = [];
         
-        [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = model(train_data(local_trainInd,:),...
+        
+        [Pre_Labels(:,local_testInd'),Outputs(:,local_testInd')] = model(train_data(local_trainInd,:),...
             cluster_target,test_data(local_testInd,:));
         
 %         if ~isempty(remove)
-%             disp(['Cluster ', num2str(i)]);
 %             disp(remove);
 %         end
 
+        
 %         [Pre_Labels(:,local_testInd'),Outputs(:,local_testInd')] = model(train_data(local_trainInd,:),...
 %             train_target(:,local_trainInd'),test_data(local_testInd,:));
     end
