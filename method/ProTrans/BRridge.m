@@ -9,7 +9,7 @@ lambda = 0.1;
 ww = ridgereg(train_target',train_data,lambda);
 Outputs = [ones(size(test_data,1),1) test_data] * ww;
 Outputs = Outputs';
-Pre_Labels = round(Outputs');
+Pre_Labels = round(Outputs);
    
 end
 

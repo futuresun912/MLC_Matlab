@@ -12,7 +12,7 @@ rng('default');
 
 % Perform n-fold cross validation and obtain evaluation results
 num_fold = 5; num_metric = 3; num_method = 5;
-num_cluster = 10; model = @CCridge;
+num_cluster = 8; model = @CCridge;
 indices = crossvalind('Kfold',size(data,1),num_fold);
 Results = zeros(num_metric+1,num_fold,num_method);
 Final_mean = zeros(num_metric+1,num_method,num_cluster-1);
@@ -83,15 +83,15 @@ x_axis = 2:num_cluster;
 metric_str = {'Execution time','Exact-Match', 'Hamming-Score','Micro-F1'};
 for i = 1:(num_metric+1)
     figure('Position', [50 50 800 600]);
-    plot(x_axis,y_mean(i,:,1),'-x', 'MarkerEdgeColor', db, 'Color', db, 'MarkerFaceColor',db, 'LineWidth', 3);
+    plot(x_axis,y_mean(i,:,1),'-x', 'MarkerEdgeColor', db, 'Color', db,  'LineWidth', 3);
     hold on;
-    plot(x_axis,y_mean(i,:,2),'-o','MarkerEdgeColor', dg, 'Color', dg, 'MarkerFaceColor',dg, 'LineWidth', 3);
+    plot(x_axis,y_mean(i,:,2),'-o','MarkerEdgeColor', dg, 'Color', dg,  'LineWidth', 3);
     hold on;
-    plot(x_axis,y_mean(i,:,3),'-s', 'MarkerEdgeColor', dr, 'Color', dr, 'MarkerFaceColor',dr, 'LineWidth', 3);
+    plot(x_axis,y_mean(i,:,3),'-s', 'MarkerEdgeColor', dr, 'Color', dr,  'LineWidth', 3);
     hold on;
-    plot(x_axis,y_mean(i,:,4),'-d', 'MarkerEdgeColor', dp, 'Color', dp, 'MarkerFaceColor',dp, 'LineWidth', 3);
+    plot(x_axis,y_mean(i,:,4),'-d', 'MarkerEdgeColor', dp, 'Color', dp,  'LineWidth', 3);
     hold on;
-    plot(x_axis,y_mean(i,:,5),'-*', 'MarkerEdgeColor', dy, 'Color', dy, 'MarkerFaceColor',dy, 'LineWidth', 3);
+    plot(x_axis,y_mean(i,:,5),'-*', 'MarkerEdgeColor', dy, 'Color', dy,  'LineWidth', 3);
     hold on;
     
     xlabel('k','FontSize', 18);

@@ -25,6 +25,7 @@ function [Pre_Labels,Outputs] = CBMLC(train_data,train_target,test_data,num_clus
 % kmeans -- the MATLAB version
 [trainInd,centroid] = kmeans(train_data,num_cluster,...
     'EmptyAction','singleton','OnlinePhase','off','Display','off');
+
 % [trainInd,centroid] = kmeans([train_data,train_target'],num_cluster,...
 %     'EmptyAction','singleton','OnlinePhase','off','Display','off');
 % centroid = centroid(:,1:size(train_data,2));
@@ -39,39 +40,68 @@ D = bsxfun(@plus,v1,v2') - 2*(test_data*centroid');
 Pre_Labels = zeros(size(train_target,1),size(test_data,1));
 Outputs = zeros(size(train_target,1),size(test_data,1));
 if any(isequal(model,@EnMLC))
-    percent = [0.5,0.8,0.8];
+    percent = [0.8,0.8,1];
     for i = 1:num_cluster
         local_testInd = find(testInd == i);
         if isempty(local_testInd)
             continue
         end
         local_trainInd = find(trainInd == i);
-        [Pre_Labels(:,local_testInd'),Outputs(:,local_testInd')] = model(train_data(local_trainInd,:),...
-            train_target(:,local_trainInd'),test_data(local_testInd,:),percent,20,@CCridge);
+        remove = all(train_target(:,local_trainInd')==0,2);   
+        [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = model(train_data(local_trainInd,:),...
+            train_target(~remove,local_trainInd'),test_data(local_testInd,:),percent,10,@CCridge);
     end
+    
+elseif (any(isequal(model,@EMLC)))
+    for i = 1:num_cluster
+        local_testInd = find(testInd == i);
+        if isempty(local_testInd)
+            continue
+        end
+        local_trainInd = find(trainInd == i);        
+        remove = all(train_target(:,local_trainInd')==0,2);        
+        [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = model(train_data(local_trainInd,:),...
+             train_target(~remove,local_trainInd'),test_data(local_testInd,:),10,@CCridge);
+        
+    end
+    
+% elseif (any(isequal(model,@DR)))
+%     for i = 1:num_cluster
+%         local_testInd = find(testInd == i);
+%         if isempty(local_testInd)
+%             continue
+%         end
+%         local_trainInd = find(trainInd == i);
+%         remove = all(train_target(:,local_trainInd')==0,2);
+%         
+%         cluster_train = train_data(local_trainInd,:);
+%         cluster_target = train_target(~remove,local_trainInd');
+%         cluster_test = test_data(local_testInd,:);
+%         
+%         alg = 'OPLS';
+%         [cluster_train,cluster_test] = DRwrapper(cluster_train,cluster_test,cluster_target,alg);
+%         
+%         [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = CCridge(cluster_train,...
+%             cluster_target,cluster_test);
+%         
+%     end
 else
     for i = 1:num_cluster
         local_testInd = find(testInd == i);
         if isempty(local_testInd)
             continue
         end
-        local_trainInd = find(trainInd == i);
-        
-%         remove = find(all(train_target(:,local_trainInd')==0,2));
-        remove = all(train_target(:,local_trainInd')==0,2);
-        cluster_target = train_target(~remove,local_trainInd');
-%         cluster_target(remove,:) = [];
-        
+        local_trainInd = find(trainInd == i);        
+        remove = all(train_target(:,local_trainInd')==0,2);        
         [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = model(train_data(local_trainInd,:),...
-            cluster_target,test_data(local_testInd,:));
+             train_target(~remove,local_trainInd'),test_data(local_testInd,:));
         
-%         if ~isempty(remove)
+%          if ~isempty(find(remove, 1))
 %             disp(['Cluster ', num2str(i)]);
-%             disp(remove);
+%             disp(['Size ', num2str(size(find(~remove),1))]);
+%             disp(find(~remove));
 %         end
 
-%         [Pre_Labels(:,local_testInd'),Outputs(:,local_testInd')] = model(train_data(local_trainInd,:),...
-%             train_target(:,local_trainInd'),test_data(local_testInd,:));
     end
 end
 
