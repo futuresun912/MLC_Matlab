@@ -4,7 +4,7 @@ addpath('data','evaluation');
 addpath(genpath('method'));
 
 % Load a multi-label dataset
-dataset = 'emotions';
+dataset = 'languagelog';
 load([dataset,'.mat']);
 
 % Make experimental resutls repeatly
@@ -14,7 +14,7 @@ rng('default');
 num_fold = 5; num_metric = 4; num_method = 20;
 indices = crossvalind('Kfold',size(data,1),num_fold);
 Results = zeros(num_metric+1,num_fold,num_method);
-num_cluster = 5;
+num_cluster = 20;
 for i = 1:num_fold
     disp(['Fold ',num2str(i)]);
     test = (indices == i); train = ~test; 
@@ -47,12 +47,12 @@ for i = 1:num_fold
 %     [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
 %     Results(2:end,i,4) = [ExactM,HamS,MacroF1,MicroF1];
   
-    % The CLMLC method with Ridge Regression
-    tic; model = @CCridge;
-    [Pre_Labels,~] = CLMLCv1(data(train,:),target(:,train'),data(test,:),num_cluster,model);
-    Results(1,i,5) = toc;
-    [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
-    Results(2:end,i,5) = [ExactM,HamS,MacroF1,MicroF1];
+%     % The CLMLC method with Ridge Regression
+%     tic; model = @CCridge;
+%     [Pre_Labels,~] = CLMLCv1(data(train,:),target(:,train'),data(test,:),num_cluster,model);
+%     Results(1,i,5) = toc;
+%     [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
+%     Results(2:end,i,5) = [ExactM,HamS,MacroF1,MicroF1];
 
 %     % The BR method with PCA
 %     tic; alg = 'PCA';
@@ -161,7 +161,7 @@ for i = 1:num_fold
     Results(2:end,i,20) = [ExactM,HamS,MacroF1,MicroF1];
 
 end
-ignore = [1:4,6:19];  Results(:,:,ignore) = [];
+ignore = [1:19];  Results(:,:,ignore) = [];
 meanResults = squeeze(mean(Results,2));
 stdResults = squeeze(std(Results,0,2) / sqrt(size(Results,2)));
 
