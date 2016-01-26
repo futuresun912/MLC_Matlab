@@ -49,11 +49,9 @@ if any(isequal(model,@EnMLC))
             continue
         end
         local_trainInd = find(trainInd == i);
-        remove = all(train_target(:,local_trainInd')==0,2);   
-        
+        remove = all(train_target(:,local_trainInd')==0,2);        
         [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = model(train_data(local_trainInd,:),...
-            train_target(~remove,local_trainInd'),test_data(local_testInd,:),percent,5,@CCridge);
-        
+            train_target(~remove,local_trainInd'),test_data(local_testInd,:),percent,5,@CCridge);    
 %         cluster_train = train_data(local_trainInd,:);
 %         cluster_target = train_target(~remove,local_trainInd');
 %         cluster_test = test_data(local_testInd,:);
@@ -62,7 +60,6 @@ if any(isequal(model,@EnMLC))
 %         [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = model(cluster_train,...
 %             cluster_target,cluster_test,percent,20,@CCridge);
     end
-    
 elseif (any(isequal(model,@EMLC)))
     for i = 1:num_cluster
         local_testInd = find(testInd == i);
@@ -72,7 +69,7 @@ elseif (any(isequal(model,@EMLC)))
         local_trainInd = find(trainInd == i);        
         remove = all(train_target(:,local_trainInd')==0,2);        
         [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = model(train_data(local_trainInd,:),...
-             train_target(~remove,local_trainInd'),test_data(local_testInd,:),5,@CCridge);
+             train_target(~remove,local_trainInd'),test_data(local_testInd,:),3,@CCridge);
         
     end
 elseif (any(isequal(model,@DR)))
@@ -82,18 +79,25 @@ elseif (any(isequal(model,@DR)))
             continue
         end
         local_trainInd = find(trainInd == i);
-        remove = all(train_target(:,local_trainInd')==0,2);
-        
+        remove = all(train_target(:,local_trainInd')==0,2);       
         cluster_train = train_data(local_trainInd,:);
         cluster_target = train_target(~remove,local_trainInd');
-        cluster_test = test_data(local_testInd,:);
-        
+        cluster_test = test_data(local_testInd,:);       
         alg = 'OPLS';
-        [cluster_train,cluster_test] = DRwrapper(cluster_train,cluster_test,cluster_target,alg);
-        
+        [cluster_train,cluster_test] = DRwrapper(cluster_train,cluster_test,cluster_target,alg);        
         [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = CCridge(cluster_train,...
-            cluster_target,cluster_test);
-        
+            cluster_target,cluster_test);   
+    end
+elseif (any(isequal(model,@metaCC)))
+    for i = 1:num_cluster
+        local_testInd = find(testInd == i);
+        if isempty(local_testInd)
+            continue
+        end
+        local_trainInd = find(trainInd == i);
+        remove = all(train_target(:,local_trainInd')==0,2);
+        [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = metaCC(train_data(local_trainInd,:),...
+            train_target(~remove,local_trainInd'),test_data(local_testInd,:));
     end
 else
     for i = 1:num_cluster
@@ -103,30 +107,14 @@ else
         end
         local_trainInd = find(trainInd == i);        
         remove = all(train_target(:,local_trainInd')==0,2);        
+        [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = model(train_data(local_trainInd,:),...
+            train_target(~remove,local_trainInd'),test_data(local_testInd,:));
         
 %         cluster_train = train_data(local_trainInd,:);
 %         cluster_test = test_data(local_testInd,:);
 %         cluster_target = train_target(~remove,local_trainInd);
-%         
-%         opts = [];
-%         opts.alg = 'eig';
-%         opts.PrjX = 1;
-%         opts.PrjY = 1;
-%         opts.regX = 0.1;
-%         opts.regY = 1;
-%         [W_x, W_y, ~] = CCA(cluster_train', cluster_target, opts);
-%         cluster_train = cluster_train * W_x;
-%         cluster_test = cluster_test * W_x;
-%         cluster_target = W_y' * cluster_target;
-%         
-%         [~,Cluster_Outputs] = model(cluster_train,cluster_target,cluster_test);
-%         Outputs(~remove,local_testInd') = W_y * Cluster_Outputs;
-%         Pre_Labels(~remove,local_testInd') = round(Outputs(~remove,local_testInd'));
-        
-        
-        [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = model(train_data(local_trainInd,:),...
-            train_target(~remove,local_trainInd'),test_data(local_testInd,:));
-        
+%         [Pre_Labels(~remove,local_testInd'),Outputs(~remove,local_testInd')] = ...
+%             model(cluster_train,cluster_target,cluster_test);
 %          if ~isempty(find(remove, 1))
 %             disp(['Cluster ', num2str(i)]);
 %             disp(['Size ', num2str(size(find(~remove),1))]);

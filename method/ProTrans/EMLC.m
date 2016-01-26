@@ -15,7 +15,9 @@ else
         Outputs = Outputs + Temp_Labels;
     end
 end
+
 Outputs = Outputs ./ m;
 Pre_Labels = round(Outputs);
+
 end
 

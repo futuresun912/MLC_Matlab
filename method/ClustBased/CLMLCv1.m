@@ -6,6 +6,9 @@ function [Pre_Labels,Outputs] = CLMLCv1(train_data,train_target,test_data,num_cl
 alg = 'OPLS';
 [train_data,test_data] = DRwrapper(train_data,test_data,train_target,alg);
 
+% Perform PCA on the feature space
+[train_data,test_data] = PCA(train_data,test_data,0.8);
+
 % Perfrom CBMLC on the subspace
 [Pre_Labels,Outputs] = CBMLC(train_data,train_target,test_data,num_cluster,model);
 

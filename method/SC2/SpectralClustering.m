@@ -52,6 +52,7 @@ end
 % compute the eigenvectors corresponding to the k smallest
 % eigenvalues
 diff   = eps;
+L = L + eye(size(L,1))*1e-8;
 [U, ~] = eigs(L, k, diff);
 
 % in case of the Jordan-Weiss algorithm, we need to normalize
@@ -63,11 +64,12 @@ end
 % now use the k-means algorithm to cluster U row-wise
 % C will be a n-by-1 matrix containing the cluster number for
 % each data point
-C = kmeans(U, k, 'start', 'cluster', ...
-                 'EmptyAction', 'singleton');
+% C = kmeans(U, k, 'start', 'cluster', ...
+%                  'EmptyAction', 'singleton');
+C = litekmeans(U,k);
              
-% now convert C to a n-by-k matrix containing the k indicator
-% vectors as columns
-C = sparse(1:size(D, 1), C, 1);
+% % now convert C to a n-by-k matrix containing the k indicator
+% % vectors as columns
+% C = sparse(1:size(D, 1), C, 1);
 
 end
