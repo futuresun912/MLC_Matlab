@@ -57,7 +57,8 @@ if strcmpi(opts.alg, '2s-lsqr')
     end
 else
     % the default choise is 2s
-    [U1, S1, V1] = svd(X, 'econ');
+%     [U1, S1, V1] = svd(X, 'econ');
+    [U1, S1, V1] = rsvd(X, 200);
     r1 = rank(S1);
     U1 = U1(:, 1:r1); S1 = S1(1:r1, 1:r1); V1 = V1(:, 1:r1);
     s1 = diag(S1);
@@ -71,7 +72,7 @@ end
 % Step 2.2: Stage 2.Solve the resulting optimization problem by replacing X with
 % X_hat
 D = W1' * X * H;
-[UD, SD, VD] = svd(D, 'econ');
+[UD, SD, ~] = svd(D, 'econ');
 %     rD = rank(SD, 1e-6);
 rD = rank(D);
 UD = UD(:, 1:rD); SD = SD(1:rD, 1:rD);

@@ -15,13 +15,9 @@ elseif (strcmp(alg,'OPLS'))
     alg = [];
     alg.alg = '2s';
     alg.reg_2norm = 1;
-    mean_data = mean(train_data,1);
-    train_data = bsxfun(@minus,train_data,mean_data);
     W = OPLS(train_data',train_target,alg);
-%     train_data = train_data * W;
-%     test_data = test_data * W;
     train_data = train_data * W;
-    test_data = bsxfun(@minus,test_data,mean_data) * W;
+    test_data = test_data * W;
 elseif (strcmp(alg,'PCA'))
     [train_data,test_data] = PCA(train_data,test_data,0.3);
 else

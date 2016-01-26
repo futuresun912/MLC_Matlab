@@ -7,21 +7,22 @@ lambda = 0.1;
 
 % Randomly generate a chain order
 num_label = size(train_target,1);
+rng(2);
 chain = randperm(num_label);
 
 % Ridge Regression
 pa = [];
-ww = cell(1,num_label);
+% ww = cell(1,num_label);
 num_test = size(test_data,1);
 Outputs = zeros(num_label,num_test);
 Pre_Labels = zeros(num_label,num_test);
 for i = chain
     if isempty(pa)
-        ww{i} = ridgereg(train_target(i,:)',train_data,lambda);
-        Outputs(i,:) = [ones(num_test,1),test_data] * ww{i};
+        ww = ridgereg(train_target(i,:)',train_data,lambda);
+        Outputs(i,:) = [ones(num_test,1),test_data] * ww;
     else
-        ww{i} = ridgereg(train_target(i,:)',[train_data train_target(pa,:)'],lambda);
-        Outputs(i,:) = [ones(num_test,1),test_data,Pre_Labels(pa,:)'] * ww{i};
+        ww = ridgereg(train_target(i,:)',[train_data train_target(pa,:)'],lambda);
+        Outputs(i,:) = [ones(num_test,1),test_data,Pre_Labels(pa,:)'] * ww;
     end
     Pre_Labels(i,:) = round(Outputs(i,:));
     pa = [pa i];

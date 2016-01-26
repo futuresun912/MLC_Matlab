@@ -4,16 +4,17 @@ addpath('data','evaluation');
 addpath(genpath('method'));
 
 % Load a multi-label dataset
-dataset = 'enron';
+dataset = 'emotions';
 load([dataset,'.mat']);
 
 % Make experimental resutls repeatly
 rng('default'); 
 
 % Perform n-fold cross validation and obtain evaluation results
-num_fold = 5; num_metric = 4; num_method = 16;
+num_fold = 5; num_metric = 4; num_method = 18;
 indices = crossvalind('Kfold',size(data,1),num_fold);
 Results = zeros(num_metric+1,num_fold,num_method);
+num_cluster = 5;
 for i = 1:num_fold
     disp(['Fold ',num2str(i)]);
     test = (indices == i); train = ~test; 
@@ -40,15 +41,14 @@ for i = 1:num_fold
 %     Results(2:end,i,3) = [ExactM,HamS,MacroF1,MicroF1];
 
 %     % The CBMLC method with Ridge Regression
-%     tic; num_cluster = 20; model = @CCridge;
+%     tic; model = @CCridge;
 %     [Pre_Labels,~] = CBMLC(data(train,:),target(:,train'),data(test,:),num_cluster,model);
 %     Results(1,i,4) = toc;
 %     [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
 %     Results(2:end,i,4) = [ExactM,HamS,MacroF1,MicroF1];
   
     % The CLMLC method with Ridge Regression
-    tic; 
-    num_cluster = 20; model = @CCridge;
+    tic; model = @CCridge;
     [Pre_Labels,~] = CLMLCv1(data(train,:),target(:,train'),data(test,:),num_cluster,model);
     Results(1,i,5) = toc;
     [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
@@ -90,7 +90,7 @@ for i = 1:num_fold
 %     Results(2:end,i,10) = [ExactM,HamS,MacroF1,MicroF1];
 
 %     % CPLST - Label Space Dimension Reduction
-%     tic; ratio = 0.8;
+%     tic; ratio = 0.4;
 %     Pre_Labels = CPLST(data(train,:),target(:,train'),data(test,:),ratio);
 %     Results(1,i,11) = toc;
 %     [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
@@ -110,32 +110,44 @@ for i = 1:num_fold
 %     [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
 %     Results(2:end,i,13) = [ExactM,HamS,MacroF1,MicroF1];
 
-    % The CLMLC method with Ridge Regression
-    tic; 
-    num_cluster = 20; model = @EnMLC;
-    [Pre_Labels,~] = CLMLCv1(data(train,:),target(:,train'),data(test,:),num_cluster,model);
-    Results(1,i,14) = toc;
-    [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
-    Results(2:end,i,14) = [ExactM,HamS,MacroF1,MicroF1];
-
 %     % The CLMLC method with Ridge Regression
 %     tic; 
-%     num_cluster = 20; model = @BRridge;
+%     num_cluster = 20; model = @EnMLC;
+%     [Pre_Labels,~] = CLMLCv1(data(train,:),target(:,train'),data(test,:),num_cluster,model);
+%     Results(1,i,14) = toc;
+%     [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
+%     Results(2:end,i,14) = [ExactM,HamS,MacroF1,MicroF1];
+
+%     % The CLMLC method with Ridge Regression
+%     tic; model = @BRridge;
 %     [Pre_Labels,~] = CLMLCv1(data(train,:),target(:,train'),data(test,:),num_cluster,model);
 %     Results(1,i,15) = toc;
 %     [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
 %     Results(2:end,i,15) = [ExactM,HamS,MacroF1,MicroF1];
     
-    % The CLMLC method with Ridge Regression
-    tic; 
-    num_cluster = 20; model = @EMLC;
-    [Pre_Labels,~] = CLMLCv1(data(train,:),target(:,train'),data(test,:),num_cluster,model);
-    Results(1,i,16) = toc;
-    [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
-    Results(2:end,i,16) = [ExactM,HamS,MacroF1,MicroF1];
+%     % The CLMLC method with Ridge Regression
+%     tic;  model = @EMLC;
+%     [Pre_Labels,~] = CLMLCv1(data(train,:),target(:,train'),data(test,:),num_cluster,model);
+%     Results(1,i,16) = toc;
+%     [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
+%     Results(2:end,i,16) = [ExactM,HamS,MacroF1,MicroF1];
+
+%     % The CC method with Ridge Regression
+%     tic;
+%     [Pre_Labels,~] = rCC(data(train,:),target(:,train'),data(test,:),10);
+%     Results(1,i,17) = toc;
+%     [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
+%     Results(2:end,i,17) = [ExactM,HamS,MacroF1,MicroF1];
+    
+%     % The ensemble MLC method
+%     tic;  model = @rCC;
+%     [Pre_Labels,~] = EMLC(data(train,:),target(:,train'),data(test,:),5,model);
+%     Results(1,i,18) = toc;
+%     [ExactM,HamS,MacroF1,MicroF1] = Evaluation(Pre_Labels,target(:,test'));
+%     Results(2:end,i,18) = [ExactM,HamS,MacroF1,MicroF1];
 
 end
-ignore = [1:4,6:13,15];  Results(:,:,ignore) = [];
+ignore = [1:4,6:18];  Results(:,:,ignore) = [];
 meanResults = squeeze(mean(Results,2));
 stdResults = squeeze(std(Results,0,2) / sqrt(size(Results,2)));
 
@@ -152,7 +164,7 @@ str1 = {'Execution time';'Exact match';'Hamming Score';'Macro F1';'Micro F1'};
 set(gca,'XTickLabel',str1);
 xlabel('Metric','FontSize', 14); ylabel('Performance','FontSize', 14);
 str2 = {'BR','CC','EnMLC','CBMLC','CLMLC-CC','BRPCA','BROPLS','MLHSL','BRSVM','CCSVM',...
-    'CPLST','PLST','FaIE','CLMLC','CLMLC-BR','CLMLC-En'}; 
+    'CPLST','PLST','FaIE','CLMLC','CLMLC-DR','CLMLC-En','rCC','ErCC'}; 
 str2(ignore) = [];
 legend(str2,'Location','NorthWest');
 hold on;

@@ -17,7 +17,7 @@ for i = 1:m
     rndIDX_att = randperm(num_att);
     rndIDX_lab = randperm(num_lab);
     rndIDX_int = randperm(num_int);
-    
+
     [Temp_Labels,~] = model(train_data(rndIDX_int(1:N),rndIDX_att(1:d)'),...
         train_target(rndIDX_lab(1:L),rndIDX_int(1:N)'),test_data(:,rndIDX_att(1:d)'));
         
